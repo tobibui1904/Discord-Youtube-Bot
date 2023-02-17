@@ -10,14 +10,14 @@ import utilities
 
 load_dotenv()
 # Save your discord token in a .env file and link it here.
-token = os.getenv('discordToken')
+token = os.getenv("discord_token")
 
 # Set the bot intents accordingly to be able to read info about guild members etc.
 intents = discord.Intents.default()
 intents.members = True
 
 # Change '/' to whatever prefix you want to use to call the bot on discord.
-bot = commands.Bot(command_prefix='/')
+bot = commands.Bot(command_prefix='!',intents=intents)
 
 # YouTube is a bitch and tries to disconnect our bot from its servers. Use this to reconnect instantly.
 # (Because of this disconnect/reconnect cycle, sometimes you will listen a sudden and brief stop)
@@ -113,7 +113,7 @@ async def play(ctx, *, arg):
     # If command's author isn't connected, return.
     except AttributeError as e:
         print(e)
-        await ctx.send("Tu não tá conectado num canal de voz, burro")
+        await ctx.send("Waiting for connection. Please also check your commend")
         return
 
     # Finds author's session.
@@ -145,11 +145,11 @@ async def play(ctx, *, arg):
     # If it is already playing something, adds to the queue
     if voice.is_playing():
         await ctx.send(thumb)
-        await ctx.send(f"Adicionado à queue: {title}")
+        await ctx.send(f"Play: {title}")
         return
     else:
         await ctx.send(thumb)
-        await ctx.send(f"Tocando agora: {title}")
+        await ctx.send(f"Here's your Youtube Video: {title}")
 
         # Guarantees that the requested music is the current music.
         session.q.set_last_as_current()
@@ -170,7 +170,7 @@ async def skip(ctx):
     session = check_session(ctx)
     # If there isn't any song to be played next, return.
     if not session.q.theres_next():
-        await ctx.send("Não tem porra nenhuma na fila, mangolão")
+        await ctx.send("No next song to play")
         return
 
     # Finds an available voice client for the bot.
@@ -198,7 +198,7 @@ async def print_info(ctx):
     """
     session = check_session(ctx)
     await ctx.send(f"Session ID: {session.id}")
-    await ctx.send(f"Música atual: {session.q.current_music.title}")
+    await ctx.send(f"Condition: {session.q.current_music.title}")
     queue = [q[0] for q in session.q.queue]
     await ctx.send(f"Queue: {queue}")
 
@@ -231,7 +231,7 @@ async def pause(ctx):
     if voice.is_playing():
         voice.pause()
     else:
-        await ctx.send("Não ta tocando porra nenhuma mlk va ser burro no inferno")
+        await ctx.send("Waiting for command")
 
 
 @bot.command(name='resume')
@@ -246,7 +246,7 @@ async def resume(ctx):
     if voice.is_paused:
         voice.resume()
     else:
-        await ctx.send("Música já ta pausada, mangolao")
+        await ctx.send("Do you want to keep playing?")
 
 
 @bot.command(name='stop')
@@ -263,8 +263,7 @@ async def stop(ctx):
         voice.stop()
         session.q.clear_queue()
     else:
-        await ctx.send("Não tem nada tocando ô abobado.")
-
+        await ctx.send("Thank you for using the bot.")
 
 # Runs bot's loop.
 bot.run(token)
